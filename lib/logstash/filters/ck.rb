@@ -71,6 +71,16 @@ class LogStash::Filters::CK < LogStash::Filters::Base
   end # def register
 
   public
+  def multi_filter(events)
+     result = []
+     events.each do |event|
+        result << event
+        filter(event){|new_event| result << new_event}
+     end
+     result
+  end # def multi_filter
+
+  public
   def filter(event)
     msg_uuid = SecureRandom.uuid.force_encoding(Encoding::UTF_8)
     event.set("uuid", msg_uuid)

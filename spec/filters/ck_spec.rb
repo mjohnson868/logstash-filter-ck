@@ -36,6 +36,13 @@ describe LogStash::Filters::CK do
     end
   end
 
+  it "should be able to multi_filter without new events" do
+    allow(subject).to receive(:filter) do |event, &block|
+      nil
+    end
+    expect(subject.multi_filter([:foo])).to eq([:foo])
+  end
+
   describe "should be able to detect log tampering" do
     it "generated entityid should be verified" do
       subject.filter(event)

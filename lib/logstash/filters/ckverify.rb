@@ -9,6 +9,16 @@ class LogStash::Filters::CKVerify < LogStash::Filters::CK
   config_name "ckverify"
 
   public
+  def multi_filter(events)
+     result = []
+     events.each do |event|
+        result << event
+        filter(event){|new_event| result << new_event}
+     end
+     result
+  end # def multi_filter
+
+  public
   def filter(event)
     entity_id = event.get("entityid")
     hash = event.get("hash")
