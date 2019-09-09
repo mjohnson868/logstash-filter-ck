@@ -1,0 +1,99 @@
+AMI instructions Amazon marketplace
+
+Short Version - This version is intended for experienced ELK administrators. See the Full version for additional details and a full walkthrough.
+After AMI is cloned, go to https://<EC2_Instance_Public_DNS>
+Create a Chainkit user account or login with existing
+The Kibana dashboard is at https://<EC2_Instance_Public_DNS>:5601
+As needed, use your Chainkit account to login.
+Use netcat to push log entries to your ELK stack, for example, “nc <EC2_Instance_Public_DNS> 23456” then type a simulated log message you want to go to the ELK stack like “admin jdoe authenticated to Server100 on 2019_09_09”.
+Wait 5 minutes, look at the Kibana dashboard which now shows your simulated log message has been Verified, the value is now True.
+Use Kibana tools to change (i.e. tamper with) the log entry.
+Wait 5 minutes, see that the dashboard shows the simulated message now shows False for Verified. 
+
+
+Full Version - For the full version of the text for the walkthrough with all the steps elaborated in detail, go to https://github.com/chainkit/logstash-AMI-walkthrough
+
+This full version of the overview will walk you through the use of the Chainkit ELK demo.
+Topic 0: Overview
+
+PencilDATA has created this AMI to show how you can harden logs on the ELK stack with the PencilDATA Chainkit server platform. We will show you how you can use the AMI image to:
+Run the ELK stack
+Send a simulated log entry to the ELK stack
+See that the log entry has been verified by Chainkit in the Kibana dashboard
+Tamper with the log entry to change the data on the log (similar to what a malicious actor may do to your systems)
+See that the log entry shows as tampered with by Chainkit in the Kibana dashboard
+
+
+Topic 1: Getting Started
+Launch the product using 1-Click.
+
+Once you have started the service, make a note of the IP assigned by Amazon. You will need this throughout these instructions. We will often refer to your assigned IP as “<EC2_Instance_Public_DNS>”.
+
+Topic 2: Login to your Kibana Dashboard
+Go to the URL assigned to it by Amazon using a web browser on your local machine. E.g. http://<EC2_Instance_Public_DNS>
+You will see the Chainkit login page. This is running on your server, and will interact with the ELK stack and the Chainkit service on the backend.
+‘Login’ using and existing Chainkit account if you have already created one on chainkit.com/start
+‘Sign up’ for an account if you do not have one. Create one by following the standard signup on the website. Save this username and password for later use.
+After successfully creating an account or signing in, you will see a Welcome message at the bottom of the web page. 
+Open up the Kibana web page to see the logs. Follow the link on the page to the URL after “View Kibana dashboard” and click on the associated URL which will be https://<EC2_Instance_Public_DNS>:5601
+There is no digital certificate issued for this server yet so, 
+Depending on your browser, you may receive a warning message about the certificate. This is normal. It will say something like, “Your connection is not private”. In that case, click through to continue to the Kibana URL. For example, on Chrome, click the “Advanced” button on the warning page and click on the “Proceed to” the URL link at the bottom.  
+Depending on the Amazon server configuration you chose when you started the image, it may take a minute or so to start up the Kibana server. 
+At the Kibana dashboard, sign in using the Chainkit username / password you created.
+At this point, you will see the default Kibana dashboard.
+To get to the logs as pre-configured by Chainkit, click on the Kibana Dashboard icon (two down from the top left corner).
+Click on the “Chainkit ELK Log Hardening” link/dashboard. You are now viewing any logs that are on your ELK stack, and are ready to continue.
+
+Our next step will create authentic logs, after which we then tamper with the logs as this simulation continues. In the first case Chainkit will show that the log has been verified, and in the second case Chainkit will show that the log has been tampered with.
+
+
+Topic 3: Make an authentic log entry, and see that Chainkit has verified the entry so you will know if it has been tampered with later. 
+
+Now you will make a log entry that you can see in your Kibana dashboard
+You will need to be able to run the Netcat command on your local Mac or Windows machine in order to write logs. This command is built into the Mac. Windows users will need to download and install from http://nmap.org/dist/ncat-portable-5.59BETA1.zip
+Open the Terminal app (Mac) or Command Prompt (Windows)
+We will simulate sending an authentic log entry to the ELK stack. We will use the ‘Netcat’ command to send a message to your AMI. 
+Let’s simulate the log entry that would be recorded when a user, potentially an administrator, signs into a server in your network. To simplify, let’s show this as a single og entry that reads, “bmiller001 signed onto Server749 on 08/20/2019_04:18:49”. 
+As your knowledge of Defense Evasion techniques increases, you will see how you could extend this simple example with more sophisticated attack scenarios, and continue to show which logs have been tampered with using Chainkit. 
+If interested, refer to the MITRE ATT&CK framework for more background reading. 
+In the Terminal or Command Prompt, type, “nc <EC2_Instance_Public_DNS> 23456” then hit Return. Be sure to use the actual IP of your AMI in place of <EC2_Instance_Public_DNS>. (Note: Do not type the quotation marks.)
+Type the log entry message you want to send to the ELK service such as “admin jdoe authenticated to Server100 on 2019_09_09”. Then press the “Return” key to get to a new line on the terminal.
+Press “Control-C” to terminate the nc command and send the log entry message to your Amazon instance (Note: Do not type the quotation marks).
+You’ve now successfully written to the ELK log. To see your log entry on your Amazon instance, open up the Kibana dashboard by going to Port 5601 on the IP for your AMI Image. e.g. http://<EC2_Instance_Public_DNS>:5601
+Find the row, probably the first entry, where the message field matches the text you entered prior using the nc command. 
+Notice the “Verified” column likely just has a “-“ in it. By default, the Chainkit service is verifying the log records every 5 minutes. Wait a few minutes, and press the blue “Refresh” button on the Kibana dashboard. 
+Now that 5 minutes has passed, and you’ve hit the “Refresh” button, you will see that the “Verified” column has changed to “True”
+
+Congrats! You’ve used the Chainkit service on your ELK stack to show that the log message has been verified. This means that any future modification to that entry will show up as False in the Kibana dashboard, meaning it has been tampered with and is now unverified.
+
+Topic 4: Modify the log entry
+Now we will simulate a malicious actor changing the logs on the source server, and show how the Chainkit service detects the change as it is pushed to the ELK stack. With proper instrumentation, this would allow you to send an alert to your Security team showing them that someone has tampered with logs, and allow them to quickly respond to the event. This will greatly reduce the time it takes to detect an attack.
+In the Kibana dashboard (again, http://<EC2_Instance_Public_DNS>:5601), expand the message row containing the message you pushed from nc. You do this by clicking on the arrow/twisty to the left of the row.
+You will need to note/copy two text fields. 
+Note/copy the text corresponding to the _index value
+Note/copy the text corresponding to the _id value
+In order to modify the log entry, we will show you how to change the log entry in Kibana.
+Go to Kibana dev tools by clicking on the third icon down in the Kibana dashboard
+Corrupt the data/document by replacing the text in the sections left hand window pane with the following text after making the proper substitution as described in the step below:
+POST ck-log-hardening/_update/5270071262303020454-813f024c-a1cc-4ba4-bfcc-f5873ad4b4bc
+{
+    "doc" : {
+        "message" : "admin super_dog authenticated to Server99 on 2019_09_09"
+    }
+}
+IMPORTANT Substitution Note: In the example above, you would substitute your “_index” value instead of [ck-log-hardening] and you would substitute your “_id” value instead of the [5270071262303020454-813f024c-a1cc-4ba4-bfcc-f5873ad4b4bc] value. 
+Click on the Right arrow that is on the left window pane where you added the text above. That will execute the update to the log. If successful, you will see an “result" : "updated" line in the right hand window pane.
+Note: You have now changed the user name from the authentic log entry of bmiller001 to super_dog and Server100 to Server999 
+Note: Congratulations! You have now simulating what malicious actors do on your servers by simply modifying the logs to cover their tracks, making forensic detection harder and taking months, not minutes as can be done with Chainkit!
+Go back to the Kibana dashboard, and notice that the Message text shows the new, modified/falsified, log entry and not the original/authentic entry.
+With the default configuration, you will need to wait 5 minutes for the regularly scheduled Chainkit interval to verify the logs.
+After 5 minutes, note the “Verified” column entry for that log shows “false”!! This is just what we were looking for, and is great as it shows that the log entry was tampered with!
+ 
+
+Topic 5: Summary
+
+With this walkthrough you have successfully spun up an ELK stack on Amazon, created log entries, seen how Chainkit shows the log entry is verified as authentic, modified/tampered with the log entry, and seen how Chainkit shows the log entry is no longer verified. 
+
+This effectively simulates what a malicious actor would do as they modify logs to cover their tracks and make forensics harder.
+
+Feel free to explore further by adding more log entries such as by using the “nc” command, and tampering with the entry in the Kibana dashboard. Additionally, see our github repository (https://github.com/chainkit) and also our website (https://chainkit.com/) for more detailed information.
