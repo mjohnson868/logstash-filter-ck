@@ -2,13 +2,11 @@
 
 This is a ChainKit filter plugin for [Logstash](https://github.com/elastic/logstash).
 
-It is fully free and fully open source. The license is MIT.
+This open source software is governed by the MIT license. 
 
-## Developing
+### 1. Installation Instructions
 
-### 1. Plugin Developement and Testing
-
-#### Code
+#### Prerequisites
 - To get started, you'll need JRuby with the Bundler gem installed.
 
 - Clone this code and logstash code
